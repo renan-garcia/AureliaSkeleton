@@ -18,7 +18,7 @@ define('app',['exports'], function (exports) {
 
     App.prototype.configureRouter = function configureRouter(config, router) {
       config.title = 'Tokyo Erp';
-      config.map([{ route: '', moduleId: 'views/login/login', title: 'Login' }, { route: 'logado', moduleId: 'views/login/logado', nav: true, title: 'Logado', name: 'logado' }]);
+      config.map([{ route: '', moduleId: 'views/cliente/cliente', title: 'Selecione' }, { route: 'login', moduleId: 'views/login/login', name: 'login' }]);
 
       this.router = router;
     };
@@ -111,7 +111,7 @@ define('resources/index',["exports"], function (exports) {
   exports.configure = configure;
   function configure(config) {}
 });
-define('views/login/logado',["exports", "aurelia-dependency-injection", "aurelia-authentication"], function (exports, _aureliaDependencyInjection, _aureliaAuthentication) {
+define('resources/elements/login',["exports", "aurelia-dependency-injection", "aurelia-authentication"], function (exports, _aureliaDependencyInjection, _aureliaAuthentication) {
   "use strict";
 
   Object.defineProperty(exports, "__esModule", {
@@ -166,7 +166,29 @@ define('views/login/logado',["exports", "aurelia-dependency-injection", "aurelia
     return Login;
   }()) || _class);
 });
-define('views/login/login',["exports", "aurelia-dependency-injection", "aurelia-authentication"], function (exports, _aureliaDependencyInjection, _aureliaAuthentication) {
+define('views/cliente/cliente',["exports", "aurelia-dependency-injection", "aurelia-authentication"], function (exports, _aureliaDependencyInjection, _aureliaAuthentication) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+    exports.Cliente = undefined;
+
+    function _classCallCheck(instance, Constructor) {
+        if (!(instance instanceof Constructor)) {
+            throw new TypeError("Cannot call a class as a function");
+        }
+    }
+
+    var _dec, _class;
+
+    var Cliente = exports.Cliente = (_dec = (0, _aureliaDependencyInjection.inject)(_aureliaAuthentication.AuthService), _dec(_class = function Cliente(authService) {
+        _classCallCheck(this, Cliente);
+
+        this.statusLogin = authService.getAccessToken();
+    }) || _class);
+});
+define('views/login/logado',["exports", "aurelia-dependency-injection", "aurelia-authentication"], function (exports, _aureliaDependencyInjection, _aureliaAuthentication) {
   "use strict";
 
   Object.defineProperty(exports, "__esModule", {
@@ -2740,7 +2762,64 @@ define('aurelia-authentication/authenticatedFilterValueConverter',['exports', 'a
     return AuthenticatedFilterValueConverter;
   }()) || _class);
 });
-define('text!app.html', ['module'], function(module) { module.exports = "<template><router-view></router-view></template>"; });
+define('views/login/login',["exports", "aurelia-dependency-injection", "aurelia-authentication"], function (exports, _aureliaDependencyInjection, _aureliaAuthentication) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.Login = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _dec, _class;
+
+  var Login = exports.Login = (_dec = (0, _aureliaDependencyInjection.inject)(_aureliaAuthentication.AuthService), _dec(_class = function () {
+    function Login(authService) {
+      _classCallCheck(this, Login);
+
+      this.username = 'renangarcia';
+      this.password = 'renangarcia';
+      this.currentToken = 'Não Logado';
+
+      this.authService = authService;
+      var statusLogin = this.authService.getAccessToken();
+      if (statusLogin) this.currentToken = "Logado";else this.currentToken = "Não logado";
+    }
+
+    Login.prototype.validarLogin = function validarLogin() {
+      var statusLogin = this.authService.getAccessToken();
+      if (statusLogin) this.currentToken = "Logado";else this.currentToken = "Não logado";
+    };
+
+    Login.prototype.login = function login() {
+      var _this = this;
+
+      return this.authService.login({
+        username: this.username,
+        password: this.password,
+        grant_type: "password"
+      }, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).catch(function (error) {
+        _this.notification.error('Login failed!');
+
+        console.error(error);
+      });
+    };
+
+    return Login;
+  }()) || _class);
+});
+define('text!app.html', ['module'], function(module) { module.exports = "<template><require from=\"./views/login/login\"></require><require from=\"bootstrap/css/bootstrap.css\"></require><nav class=\"navbar navbar-inverse navbar-fixed-top\"><div class=\"container\"><div class=\"navbar-header\"><button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#navbar\" aria-expanded=\"false\" aria-controls=\"navbar\"><span class=\"sr-only\">Toggle navigation</span></button> <a class=\"navbar-brand\" href=\"#\">Tokyo Erp</a></div><login></login></div></nav><div class=\"container\"><router-view></router-view></div><div class=\"container\"><hr><footer><p>&copy; 2016 Company, Inc.</p></footer></div></template>"; });
+define('text!resources/elements/login.html', ['module'], function(module) { module.exports = "<template><div id=\"navbar\" class=\"navbar-collapse collapse\" authenticated.bind=\"authenticated\"><form class=\"navbar-form navbar-right\" submit.delegate=\"login()\"><div class=\"form-group\"><input type=\"text\" placeholder=\"Email\" class=\"form-control\" value.bind=\"username\"></div><div class=\"form-group\"><input type=\"password\" placeholder=\"Password\" class=\"form-control\" value.bind=\"password\"></div><button type=\"submit\" class=\"btn btn-success\">Sign in</button></form></div></template>"; });
+define('text!views/cliente/cliente.html', ['module'], function(module) { module.exports = "<template><div style=\"margin-top:50px\">${statusLogin}</div></template>"; });
 define('text!views/login/logado.html', ['module'], function(module) { module.exports = "<template><input type=\"text\" value.bind=\"currentToken\"> <button type=\"button\" click.trigger=\"validarLogin()\">Validar Logado</button><form submit.delegate=\"login()\"><div class=\"form-group\"><label for=\"username\" t=\"Username\"></label><input type=\"text\" class=\"form-control\" id=\"username\" t=\"[placeholder]Username\" value.bind=\"username\"></div><div class=\"form-group\"><label for=\"password\" t=\"Password\"></label><input type=\"password\" class=\"form-control\" id=\"password\" t=\"[placeholder]Password\" value.bind=\"password\"></div><button type=\"submit\" class=\"btn btn-default\">Login</button></form></template>"; });
-define('text!views/login/login.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><nav class=\"navbar navbar-inverse navbar-fixed-top\"><div class=\"container\"><div class=\"navbar-header\"><button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#navbar\" aria-expanded=\"false\" aria-controls=\"navbar\"><span class=\"sr-only\">Toggle navigation</span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span></button> <a class=\"navbar-brand\" href=\"#\">Project name</a></div><div id=\"navbar\" class=\"navbar-collapse collapse\" authenticated.bind=\"authenticated\"><form class=\"navbar-form navbar-right\" submit.delegate=\"login()\"><div class=\"form-group\"><input type=\"text\" placeholder=\"Email\" class=\"form-control\" value.bind=\"username\"></div><div class=\"form-group\"><input type=\"password\" placeholder=\"Password\" class=\"form-control\" value.bind=\"password\"></div><button type=\"submit\" class=\"btn btn-success\">Sign in</button></form></div></div></nav><div class=\"jumbotron\"><div class=\"container\"><h1>Hello, world!</h1><p>This is a template for a simple marketing or informational website. It includes a large callout called a jumbotron and three supporting pieces of content. Use it as a starting point to create something more unique.</p><p><a class=\"btn btn-primary btn-lg\" href=\"#\" role=\"button\">Learn more &raquo;</a></p></div></div><div class=\"container\"><div class=\"row\"><div class=\"col-md-4\"><h2>Heading</h2><p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.</p><p><a class=\"btn btn-default\" href=\"#\" role=\"button\">View details &raquo;</a></p></div><div class=\"col-md-4\"><h2>Heading</h2><p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.</p><p><a class=\"btn btn-default\" href=\"#\" role=\"button\">View details &raquo;</a></p></div><div class=\"col-md-4\"><h2>Heading</h2><p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p><p><a class=\"btn btn-default\" href=\"#\" role=\"button\">View details &raquo;</a></p></div></div><hr><footer><p>&copy; 2016 Company, Inc.</p></footer></div></template>"; });
+define('text!views/login/login.html', ['module'], function(module) { module.exports = "<template><div id=\"navbar\" class=\"navbar-collapse collapse\" authenticated.bind=\"authenticated\"><form class=\"navbar-form navbar-right\" submit.delegate=\"login()\"><div class=\"form-group\"><input type=\"text\" placeholder=\"Email\" class=\"form-control\" value.bind=\"username\"></div><div class=\"form-group\"><input type=\"password\" placeholder=\"Password\" class=\"form-control\" value.bind=\"password\"></div><button type=\"submit\" class=\"btn btn-success\">Sign in</button></form></div></template>"; });
 //# sourceMappingURL=app-bundle.js.map

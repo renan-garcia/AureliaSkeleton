@@ -17,6 +17,7 @@ export class Login {
       this.currentToken = "Logado";
     else
      this.currentToken = "Não logado";
+     
   }
 
   validarLogin(){
